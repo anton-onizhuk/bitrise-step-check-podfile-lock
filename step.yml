@@ -1,87 +1,60 @@
-#
-# A couple of useful guides & docs:
-#
-# - Main Bitrise CLI docs: https://github.com/bitrise-io/bitrise/tree/master/_docs
-# - Step Development Guideline: https://github.com/bitrise-io/bitrise/blob/master/_docs/step-development-guideline.md
-# - Bitrise.yml format spec: https://github.com/bitrise-io/bitrise/blob/master/_docs/bitrise-yml-format-spec.md
-# - Bitrise docs: http://devcenter.bitrise.io/
-# - Bitrise CLI guides: http://devcenter.bitrise.io/bitrise-cli/
 
 title: |-
   Check Podfile.lock
 summary: |
   Test Podfile.lock for any changes since previous pod install
 description: |
-  Test Podfile.lock for any changes since previous pod install
+  Test Podfile.lock for any changes since previous pod install. 
+
+  Basically it runs the same script as you probably have in your build phases under the name `[CP] Check Pods Manifest.lock` that annoyingly complains `"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation."`. 
+
+  Here though you can use it to skip `pod install` completely and save some build time, which could be between few seconds and a couple of minutes depending on the project and the phase of the moon. 
+
+  Step output is saved to env variable `PODS_OUT_OF_SYNC`. This step will never fail. If any of files if not found or random error happends the variable value is `true`.
 website: https://github.com/anton-onizhuk/bitrise-step-check-podfile-lock
 source_code_url: https://github.com/anton-onizhuk/bitrise-step-check-podfile-lock
 support_url: https://github.com/anton-onizhuk/bitrise-step-check-podfile-lock/issues
 host_os_tags:
   - osx-10.10
-  - ubuntu-16.04
-
-# If this step should be available only for certain project types
-# just uncomment this `project_type_tags` section and include all the
-# project types supported by the step. If the step can be used for all
-# project types then you can just remove this section.
-# If no `project_type_tags` specified (or specified as an empty array)
-# that means the step can be used for any project type.
-# You can find more information about project type tags in the Step Development Guideline:
-# https://github.com/bitrise-io/bitrise/blob/master/_docs/step-development-guideline.md
-#
-# project_type_tags:
-#   - ios
-#   - macos
-#   - android
-#   - xamarin
-#   - react-native
-#   - cordova
-#   - ionic
-
-# Type tags are used for categorizing steps, for easier step discovery in Step Libraries.
-# You can find more information about type tags in the Step Development Guideline:
-# https://github.com/bitrise-io/bitrise/blob/master/_docs/step-development-guideline.md
+project_type_tags:
+  - ios
+  - macos
 type_tags:
   - dependency
 
-is_requires_admin_user: true
+is_requires_admin_user: false
 is_always_run: false
-is_skippable: false
+is_skippable: true
 run_if: ""
-
-deps:
-  brew:
-  - name: git
-  - name: wget
-  apt_get:
-  - name: git
-  - name: wget
-
 
 toolkit:
   bash:
     entry_file: step.sh
 
-
 inputs:
-  - example_step_input: Default Value - you can leave this empty if you want to
+  - podfile_lock_path: "$BITRISE_SOURCE_DIR/Podfile.lock"
     opts:
-      title: "Example Step Input"
-      summary: Summary. No more than 2-3 sentences.
+      title: Podfile.lock file
+      summary: Path to Podfile.lock file
       description: |
-        Description of this input.
-
-        Can be Markdown formatted text.
+        Path to Podfile.lock file
       is_expand: true
       is_required: true
-      value_options: []
+  - maifest_lock_path: "$BITRISE_SOURCE_DIR/Pods/Manifest.lock"
+    opts:
+      title: Manifest.lock file
+      summary: Path to Manifest.lock file
+      description: |
+        Path to Manifest.lock file
+      is_expand: true
+      is_required: true
 
 outputs:
-  - EXAMPLE_STEP_OUTPUT:
+  - PODS_OUT_OF_SYNC:
     opts:
-      title: "Example Step Output"
-      summary: Summary. No more than 2-3 sentences.
+      title: Does Podfile.lock contain changes
+      summary: ""
       description: |
-        Description of this output.
+        Is `false` if Podfile.lock contains no changes since last `pod install`. In any other case (has changes, file not found, any random error) equals to `true`.
 
-        Can be Markdown formatted text.
+        Essentially it is the answer on the question, will Xcode fail the build because pods are out of sync. `false` doesn't mean that you don't need to update pods, but Xcode won't complain if you decide not to, at least during build phases' script.
