@@ -32,5 +32,4 @@ echo " (?) SUCCESS"
 echo " (?) Pods are in sync, can skip 'pod install'"
 
 envman add --key PODS_OUT_OF_SYNC --value 'false'
-
-echo " (?) env get PODS_OUT_OF_SYNC: ${PODS_OUT_OF_SYNC}"
+envman run bash -c 'echo " (?) env get PODS_OUT_OF_SYNC: $PODS_OUT_OF_SYNC"'
