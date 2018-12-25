@@ -6,13 +6,13 @@ echo " (?) maifest_lock_path: $maifest_lock_path"
 
 envman add --key PODS_OUT_OF_SYNC --value 'true'
 
-if [ -s "${podfile_lock_path}" ]; then
+if [ ! -s "${podfile_lock_path}" ]; then
     echo " [!] No file found at path '${podfile_lock_path}'"
     echo " [!] Expected to find Podfile.lock"
     echo " [!] Exiting"
     exit 0
 fi
-if [ -s "${maifest_lock_path}" ]; then
+if [ ! -s "${maifest_lock_path}" ]; then
     echo " [!] No file found at path '${maifest_lock_path}'"
     echo " [!] Expected to find Manifest.lock"
     echo " [!] Exiting"
